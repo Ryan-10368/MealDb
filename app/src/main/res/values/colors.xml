@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Existing colors (if any) -->
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryVariant">#3700B3</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+
+    <!-- Missing colors that need to be defined -->
+    <color name="primary">#6200EE</color>
+    <color name="gray">#757575</color>
+
+    <!-- Alternative for lighter_gray -->
+    <color name="lighter_gray">#E0E0E0</color>
+
+    <!-- Additional useful colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="dark_gray">#424242</color>
+    <color name="light_gray">#BDBDBD</color>
+</resources>
