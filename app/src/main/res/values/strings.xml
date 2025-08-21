@@ -1,14 +1,18 @@
 <resources>
     <string name="app_name">MealDB</string>
     <string name="meal_image">Meal Image</string>
-    <string name="search_meals">Search meals...</string>
+    <string name="search_meals">Search meals…</string>
     <string name="random_meal">Random Meal</string>
     <string name="meal_name">Meal Name</string>
     <string name="meal_category">Category</string>
     <string name="meal_area">Area</string>
     <string name="ingredients">Ingredients</string>
     <string name="instructions">Instructions</string>
-    <string name="loading">Loading...</string>
+    <string name="loading">Loading…</string>
     <string name="error_loading_meals">Error loading meals</string>
     <string name="no_meals_found">No meals found</string>
+    <string name="category_format">Category: %1$s</string>
+    <string name="area_format">Area: %1$s</string>
+    <string name="unknown">Unknown</string>
+    <string name="no_instructions_available">No instructions available</string>
 </resources>

@@ -1,15 +1,18 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-parcelize")
+    kotlin("kapt")  // Use this syntax for kapt
 }
 
 android {
-    namespace = "com.example.mealdb"  // Changed to match your package
-    compileSdk = 34
+    namespace = "com.example.mealdb"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.mealdb"  // Changed to match your package
+        applicationId = "com.example.mealdb"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -28,13 +31,14 @@ android {
         }
     }
 
+    // Updated to Java 11 to fix the deprecation warning
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     buildFeatures {
@@ -44,35 +48,43 @@ android {
 
 dependencies {
     // Core Android
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.10.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.constraintlayout)
 
     // RecyclerView
-    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation(libs.androidx.recyclerview)
 
     // Fragment
-    implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation(libs.androidx.fragment.ktx)
 
     // Lifecycle (ViewModel & LiveData)
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
 
     // Navigation Component
-    implementation("androidx.navigation:navigation-fragment-ktx:2.7.5")
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.5")
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
 
     // Networking
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
 
     // Image Loading
-    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation(libs.glide)
+
+    // Room Database - using explicit versions
+    implementation(libs.androidx.room.runtime.v272)
+    implementation(libs.androidx.room.ktx.v272)
+    kapt(libs.androidx.room.compiler.v272)
+
+    // Coroutines (needed for Room)
+    implementation(libs.kotlinx.coroutines.android)
 
     // Testing
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

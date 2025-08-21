@@ -1,15 +1,20 @@
 package com.example.mealdb.data
 
+import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-class MealViewModel : ViewModel() {
+class MealViewModel(application: Application) : AndroidViewModel(application) {
 
     private val api = ApiClient.mealApiService
+
+    // Favorites Repository
+    private val database = MealDatabase.getDatabase(application)
+    private val favoritesRepository = FavoritesRepository(database.favoriteMealDao())
 
     private val _meals = MutableLiveData<List<Meal>>()
     val meals: LiveData<List<Meal>> = _meals
@@ -19,6 +24,9 @@ class MealViewModel : ViewModel() {
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
+
+    // Favorites LiveData
+    val favoritesMeals: LiveData<List<FavoriteMeal>> = favoritesRepository.getAllFavorites()
 
     fun searchMeals(query: String) {
         viewModelScope.launch {
@@ -79,5 +87,26 @@ class MealViewModel : ViewModel() {
             Log.e("MealViewModel", "Network error", e)
             null
         }
+    }
+
+    // Favorites Functions
+    fun toggleFavorite(meal: Meal) {
+        viewModelScope.launch {
+            try {
+                val isNowFavorite = favoritesRepository.toggleFavorite(meal)
+                // You can show a toast or update UI to indicate success
+            } catch (e: Exception) {
+                _error.value = "Error updating favorites: ${e.message}"
+                Log.e("MealViewModel", "Favorites error", e)
+            }
+        }
+    }
+
+    fun isFavorite(mealId: String): LiveData<Boolean> {
+        return favoritesRepository.isFavorite(mealId)
+    }
+
+    suspend fun checkIsFavorite(mealId: String): Boolean {
+        return favoritesRepository.checkIsFavorite(mealId)
     }
 }

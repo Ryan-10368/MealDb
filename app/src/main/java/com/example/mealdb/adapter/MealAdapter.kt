@@ -11,7 +11,8 @@ import com.example.mealdb.data.Meal
 import com.example.mealdb.databinding.ItemMealBinding
 
 class MealAdapter(
-    private val onMealClick: (Meal) -> Unit
+    private val onMealClick: (Meal) -> Unit,
+    private val onFavoriteClick: (Meal) -> Unit
 ) : ListAdapter<Meal, MealAdapter.MealViewHolder>(MealDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MealViewHolder {
@@ -33,8 +34,10 @@ class MealAdapter(
 
         fun bind(meal: Meal) {
             binding.apply {
-                // Fix the view IDs to match your layout
+                // Set meal name
                 textViewMealName.text = meal.strMeal
+
+                // Combine category and area (keeping your existing logic)
                 textViewMealCategory.text = buildString {
                     meal.strCategory?.let { append(it) }
                     if (meal.strCategory != null && meal.strArea != null) append(" • ")
@@ -50,10 +53,27 @@ class MealAdapter(
                         .into(imageViewMeal)
                 }
 
+                // Click listeners
                 root.setOnClickListener {
                     onMealClick(meal)
                 }
+
+                // Favorite button click listener
+                buttonFavorite.setOnClickListener {
+                    onFavoriteClick(meal)
+                }
             }
+        }
+
+        // Method to update favorite button state
+        fun updateFavoriteButton(isFavorite: Boolean) {
+            binding.buttonFavorite.setImageResource(
+                if (isFavorite) {
+                    R.drawable.ic_favorite_filled
+                } else {
+                    R.drawable.ic_favorite_border
+                }
+            )
         }
     }
 

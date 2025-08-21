@@ -52,6 +52,18 @@
 
         </LinearLayout>
 
+        <!-- Added Favorite Button -->
+        <ImageButton
+            android:id="@+id/buttonFavorite"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_favorite_border"
+            android:contentDescription="Toggle Favorite"
+            android:padding="12dp" />
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

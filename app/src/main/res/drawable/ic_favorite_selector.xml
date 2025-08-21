@@ -1,0 +1,5 @@
+<!-- res/drawable/ic_favorite_selector.xml - Selector to switch between filled/unfilled -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true" android:drawable="@drawable/ic_favorite_filled" />
+    <item android:drawable="@drawable/ic_favorite_border" />
+</selector>
