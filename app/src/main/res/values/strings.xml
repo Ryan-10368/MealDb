@@ -15,4 +15,19 @@
     <string name="area_format">Area: %1$s</string>
     <string name="unknown">Unknown</string>
     <string name="no_instructions_available">No instructions available</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
+
+    <!-- MISSING STRINGS - Add these: -->
+    <string name="add_to_favorites">Add to Favorites</string>
+    <string name="your_favorites">Your Favorites</string>
+    <string name="no_favorites_message">No favorite meals yet. Start adding some!</string>
+    <string name="sort_by">Sort by</string>
+    <string name="default_sort">Default</string>
+    <string name="name_a_z">Name (A-Z)</string>
+    <string name="name_z_a">Name (Z-A)</string>
+    <string name="area_a_z">Area (A-Z)</string>
+    <string name="area_z_a">Area (Z-A)</string>
+    <string name="category_a_z">Category (A-Z)</string>
+    <string name="category_z_a">Category (Z-A)</string>
+    <string name="favorites_first">Favorites First</string>
 </resources>

@@ -15,6 +15,15 @@ class MealAdapter(
     private val onFavoriteClick: (Meal) -> Unit
 ) : ListAdapter<Meal, MealAdapter.MealViewHolder>(MealDiffCallback()) {
 
+    // Add this property to track favorites
+    private var favoriteMealIds: Set<String> = emptySet()
+
+    // Add this method to update favorites
+    fun updateFavorites(favoriteIds: Set<String>) {
+        favoriteMealIds = favoriteIds
+        notifyDataSetChanged() // This will refresh all visible items
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MealViewHolder {
         val binding = ItemMealBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -37,7 +46,7 @@ class MealAdapter(
                 // Set meal name
                 textViewMealName.text = meal.strMeal
 
-                // Combine category and area (keeping your existing logic)
+                // Combine category and area
                 textViewMealCategory.text = buildString {
                     meal.strCategory?.let { append(it) }
                     if (meal.strCategory != null && meal.strArea != null) append(" • ")
@@ -53,6 +62,10 @@ class MealAdapter(
                         .into(imageViewMeal)
                 }
 
+                // THIS IS THE KEY FIX - Set favorite button state
+                val isFavorite = favoriteMealIds.contains(meal.idMeal)
+                buttonFavorite.isSelected = isFavorite
+
                 // Click listeners
                 root.setOnClickListener {
                     onMealClick(meal)
@@ -63,17 +76,6 @@ class MealAdapter(
                     onFavoriteClick(meal)
                 }
             }
-        }
-
-        // Method to update favorite button state
-        fun updateFavoriteButton(isFavorite: Boolean) {
-            binding.buttonFavorite.setImageResource(
-                if (isFavorite) {
-                    R.drawable.ic_favorite_filled
-                } else {
-                    R.drawable.ic_favorite_border
-                }
-            )
         }
     }
 

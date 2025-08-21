@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="120dp"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/imageViewMeal"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:contentDescription="@string/meal_image"
+                android:scaleType="centerCrop"
+                android:background="@color/cardview_light_background"
+                tools:src="@tools:sample/avatars" />
+
+            <!-- Favorite button in top-right corner -->
+            <ImageButton
+                android:id="@+id/buttonFavorite"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="4dp"
+                android:background="@drawable/circle_background"
+                android:src="@drawable/ic_favorite_selector"
+                android:contentDescription="@string/remove_from_favorites"
+                android:padding="4dp" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/textViewMealName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textAlignment="center"
+            tools:text="Delicious Meal" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

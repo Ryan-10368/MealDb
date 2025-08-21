@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".data.MealDetailActivity">
+    tools:context=".ui.MealDetailActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -95,6 +95,17 @@
                 android:lineSpacingExtra="4dp"
                 android:textColor="@android:color/black"
                 tools:text="Detailed cooking instructions will appear here..." />
+
+            <!-- Optional: Add a favorite button -->
+            <Button
+                android:id="@+id/buttonToggleFavorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:text="@string/add_to_favorites"
+                app:icon="@drawable/ic_favorite_border"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
         </LinearLayout>
 

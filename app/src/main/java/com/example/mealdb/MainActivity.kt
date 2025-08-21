@@ -9,17 +9,20 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.mealdb.adapter.FavoriteMealAdapter
 import com.example.mealdb.adapter.MealAdapter
 import com.example.mealdb.data.Meal
-import com.example.mealdb.data.MealDetailActivity
 import com.example.mealdb.data.MealViewModel
+import com.example.mealdb.data.toMeal
 import com.example.mealdb.databinding.ActivityMainBinding
+import com.example.mealdb.ui.MealDetailActivity
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MealViewModel
     private lateinit var mealAdapter: MealAdapter
+    private lateinit var favoritesAdapter: FavoriteMealAdapter
 
     // Store original list for sorting
     private var originalMealsList: List<Meal> = emptyList()
@@ -43,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupViewModel()
-        setupRecyclerView()
+        setupRecyclerViews()
         setupSearch()
         setupSortingSpinner()
         observeViewModel()
@@ -53,21 +56,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupViewModel() {
-        // Use AndroidViewModelFactory for AndroidViewModel
         viewModel = ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
         )[MealViewModel::class.java]
     }
 
-    private fun setupRecyclerView() {
+    private fun setupRecyclerViews() {
+        // Setup main meals adapter
         mealAdapter = MealAdapter(
             onMealClick = { meal ->
-                // Navigate to meal detail
                 navigateToMealDetail(meal)
             },
             onFavoriteClick = { meal ->
-                // Handle favorite toggle
                 viewModel.toggleFavorite(meal)
                 Toast.makeText(this, "Favorite updated", Toast.LENGTH_SHORT).show()
             }
@@ -76,26 +77,137 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerViewMeals.apply {
             adapter = mealAdapter
             layoutManager = LinearLayoutManager(this@MainActivity)
+            isNestedScrollingEnabled = false
+        }
+
+        // Setup favorites adapter
+        favoritesAdapter = FavoriteMealAdapter(
+            onMealClick = { favoriteMeal ->
+                // Use extension function to convert FavoriteMeal to Meal
+                val meal = favoriteMeal.toMeal()
+                navigateToMealDetail(meal)
+            },
+            onFavoriteClick = { favoriteMeal ->
+                // Use extension function to convert and toggle
+                val meal = favoriteMeal.toMeal()
+                viewModel.toggleFavorite(meal)
+                Toast.makeText(this, "Removed from favorites", Toast.LENGTH_SHORT).show()
+            }
+        )
+
+        binding.recyclerViewFavorites.apply {
+            adapter = favoritesAdapter
+            layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
+            isNestedScrollingEnabled = false
         }
     }
 
     private fun setupSearch() {
         binding.searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let {
-                    viewModel.searchMeals(it)
+                query?.let { searchQuery ->
+                    performEnhancedSearch(searchQuery.trim())
                 }
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                // Optional: implement real-time search
+                // Optional: Add real-time search as user types
+                newText?.let { query ->
+                    if (query.length >= 2) { // Start searching after 2 characters
+                        performEnhancedSearch(query.trim())
+                    } else if (query.isEmpty()) {
+                        loadRandomMeal() // Reset to random meals when search is cleared
+                    }
+                }
                 return true
             }
         })
 
         binding.buttonRandomMeal.setOnClickListener {
             loadRandomMeal()
+            binding.searchView.setQuery("", false) // Clear search
+        }
+    }
+
+    private fun performEnhancedSearch(query: String) {
+        if (query.isEmpty()) return
+
+        // Check if this looks like a cuisine/area search
+        val cuisineAliases = mapOf(
+            "chinese" to "chinese",
+            "china" to "chinese",
+            "italian" to "italian",
+            "italy" to "italian",
+            "mexican" to "mexican",
+            "mexico" to "mexican",
+            "indian" to "indian",
+            "india" to "indian",
+            "american" to "american",
+            "usa" to "american",
+            "british" to "british",
+            "uk" to "british",
+            "english" to "british",
+            "french" to "french",
+            "france" to "french",
+            "japanese" to "japanese",
+            "japan" to "japanese",
+            "thai" to "thai",
+            "thailand" to "thai",
+            "greek" to "greek",
+            "greece" to "greek",
+            "spanish" to "spanish",
+            "spain" to "spanish",
+            "moroccan" to "moroccan",
+            "morocco" to "moroccan",
+            "turkish" to "turkish",
+            "turkey" to "turkish"
+        )
+
+        // Add category aliases for common food categories
+        val categoryAliases = mapOf(
+            "beef" to "beef",
+            "chicken" to "chicken",
+            "dessert" to "dessert",
+            "desserts" to "dessert",
+            "lamb" to "lamb",
+            "miscellaneous" to "miscellaneous",
+            "misc" to "miscellaneous",
+            "pasta" to "pasta",
+            "pork" to "pork",
+            "seafood" to "seafood",
+            "fish" to "seafood",
+            "side" to "side",
+            "sides" to "side",
+            "starter" to "starter",
+            "starters" to "starter",
+            "appetizer" to "starter",
+            "appetizers" to "starter",
+            "vegan" to "vegan",
+            "vegetarian" to "vegetarian",
+            "veggie" to "vegetarian",
+            "breakfast" to "breakfast"
+        )
+
+        val normalizedQuery = query.lowercase()
+        val matchedCuisine = cuisineAliases[normalizedQuery]
+        val matchedCategory = categoryAliases[normalizedQuery]
+
+        when {
+            matchedCuisine != null -> {
+                // Search by area/cuisine
+                viewModel.searchMealsByArea(matchedCuisine)
+                Toast.makeText(this, "Searching for $matchedCuisine cuisine...", Toast.LENGTH_SHORT).show()
+            }
+            matchedCategory != null -> {
+                // Search by category
+                viewModel.searchMealsByCategory(matchedCategory)
+                Toast.makeText(this, "Searching for $matchedCategory category...", Toast.LENGTH_SHORT).show()
+            }
+            else -> {
+                // Use the enhanced search method that tries name, then area, then category
+                viewModel.searchMealsEnhanced(query)
+            }
         }
     }
 
@@ -116,9 +228,14 @@ class MainActivity : AppCompatActivity() {
     private fun observeViewModel() {
         viewModel.meals.observe(this) { meals ->
             originalMealsList = meals
-            // Apply current sorting when new data arrives
             val currentSortPosition = binding.spinnerSort.selectedItemPosition
             applySorting(currentSortPosition)
+
+            // Show search results info
+            if (binding.searchView.query.isNotEmpty()) {
+                val searchTerm = binding.searchView.query.toString()
+                Toast.makeText(this, "Found ${meals.size} meals for '$searchTerm'", Toast.LENGTH_SHORT).show()
+            }
         }
 
         viewModel.isLoading.observe(this) { isLoading ->
@@ -131,18 +248,32 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Observe favorites to update favorite IDs set and re-apply sorting
+        // Handle favorites display
         viewModel.favoritesMeals.observe(this) { favorites ->
-            // Update the set of favorite meal IDs
             favoriteMealIds = favorites.map { it.idMeal }.toSet()
+            mealAdapter.updateFavorites(favoriteMealIds)
 
-            // Show favorites count
-            val favCount = favorites.size
-            if (favCount > 0) {
-                println("Total favorites: $favCount")
+            // Update favorites section visibility and content
+            if (favorites.isEmpty()) {
+                // Show "no favorites" message
+                binding.textViewNoFavorites.visibility = View.VISIBLE
+                binding.textViewFavoritesHeader.visibility = View.GONE
+                binding.recyclerViewFavorites.visibility = View.GONE
+                binding.divider.visibility = View.GONE
+            } else {
+                // Show favorites section
+                binding.textViewNoFavorites.visibility = View.GONE
+                binding.textViewFavoritesHeader.visibility = View.VISIBLE
+                binding.recyclerViewFavorites.visibility = View.VISIBLE
+                binding.divider.visibility = View.VISIBLE
+
+                // Update favorites adapter
+                favoritesAdapter.submitList(favorites)
+
+                // Update header with count
+                binding.textViewFavoritesHeader.text = "❤️ Your Favorites (${favorites.size})"
             }
 
-            // Re-apply current sorting to reflect favorite changes
             val currentSortPosition = binding.spinnerSort.selectedItemPosition
             applySorting(currentSortPosition)
         }
@@ -152,21 +283,18 @@ class MainActivity : AppCompatActivity() {
         if (originalMealsList.isEmpty()) return
 
         val sortedList = when (sortPosition) {
-            0 -> originalMealsList // Default
-            1 -> originalMealsList.sortedBy { it.strMeal?.lowercase() } // Name A-Z
-            2 -> originalMealsList.sortedByDescending { it.strMeal?.lowercase() } // Name Z-A
-            3 -> originalMealsList.sortedBy { it.strArea?.lowercase() ?: "zzz" } // Area A-Z
-            4 -> originalMealsList.sortedByDescending { it.strArea?.lowercase() ?: "zzz" } // Area Z-A
-            5 -> originalMealsList.sortedBy { it.strCategory?.lowercase() ?: "zzz" } // Category A-Z
-            6 -> originalMealsList.sortedByDescending { it.strCategory?.lowercase() ?: "zzz" } // Category Z-A
-            7 -> sortByFavoritesFirst() // Favorites First
+            0 -> originalMealsList
+            1 -> originalMealsList.sortedBy { it.strMeal?.lowercase() }
+            2 -> originalMealsList.sortedByDescending { it.strMeal?.lowercase() }
+            3 -> originalMealsList.sortedBy { it.strArea?.lowercase() ?: "zzz" }
+            4 -> originalMealsList.sortedByDescending { it.strArea?.lowercase() ?: "zzz" }
+            5 -> originalMealsList.sortedBy { it.strCategory?.lowercase() ?: "zzz" }
+            6 -> originalMealsList.sortedByDescending { it.strCategory?.lowercase() ?: "zzz" }
+            7 -> sortByFavoritesFirst()
             else -> originalMealsList
         }
 
-        mealAdapter.submitList(sortedList) {
-            // Scroll to top after the list is updated
-            binding.recyclerViewMeals.scrollToPosition(0)
-        }
+        mealAdapter.submitList(sortedList)
     }
 
     private fun sortByFavoritesFirst(): List<Meal> {
@@ -175,19 +303,15 @@ class MainActivity : AppCompatActivity() {
             val isMeal2Favorite = favoriteMealIds.contains(meal2.idMeal)
 
             when {
-                isMeal1Favorite && !isMeal2Favorite -> -1 // meal1 is favorite, goes first
-                !isMeal1Favorite && isMeal2Favorite -> 1  // meal2 is favorite, goes first
-                else -> {
-                    // Both are favorites or both are not favorites - sort by name
-                    (meal1.strMeal ?: "").compareTo(meal2.strMeal ?: "", ignoreCase = true)
-                }
+                isMeal1Favorite && !isMeal2Favorite -> -1
+                !isMeal1Favorite && isMeal2Favorite -> 1
+                else -> (meal1.strMeal ?: "").compareTo(meal2.strMeal ?: "", ignoreCase = true)
             }
         }
     }
 
     private fun loadRandomMeal() {
         viewModel.getRandomMeal()
-        // Reset spinner to default when loading random meal
         binding.spinnerSort.setSelection(0)
     }
 

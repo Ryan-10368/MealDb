@@ -2,95 +2,100 @@ package com.example.mealdb.data
 
 import com.google.gson.annotations.SerializedName
 
-data class MealResponse(
-    @SerializedName("meals")
-    val meals: List<Meal>?
-)
 
 data class Meal(
     @SerializedName("idMeal")
-    val idMeal: String?,
+    val idMeal: String? = null,
 
     @SerializedName("strMeal")
-    val strMeal: String?,
+    val strMeal: String? = null,
 
     @SerializedName("strDrinkAlternate")
-    val strDrinkAlternate: String?,
+    val strDrinkAlternate: String? = null,
 
     @SerializedName("strCategory")
-    val strCategory: String?,
+    val strCategory: String? = null,
 
     @SerializedName("strArea")
-    val strArea: String?,
+    val strArea: String? = null,
 
     @SerializedName("strInstructions")
-    val strInstructions: String?,
+    val strInstructions: String? = null,
 
     @SerializedName("strMealThumb")
-    val strMealThumb: String?,
+    val strMealThumb: String? = null,
 
     @SerializedName("strTags")
-    val strTags: String?,
+    val strTags: String? = null,
 
     @SerializedName("strYoutube")
-    val strYoutube: String?,
+    val strYoutube: String? = null,
 
     // Ingredients (up to 20)
-    @SerializedName("strIngredient1") val strIngredient1: String?,
-    @SerializedName("strIngredient2") val strIngredient2: String?,
-    @SerializedName("strIngredient3") val strIngredient3: String?,
-    @SerializedName("strIngredient4") val strIngredient4: String?,
-    @SerializedName("strIngredient5") val strIngredient5: String?,
-    @SerializedName("strIngredient6") val strIngredient6: String?,
-    @SerializedName("strIngredient7") val strIngredient7: String?,
-    @SerializedName("strIngredient8") val strIngredient8: String?,
-    @SerializedName("strIngredient9") val strIngredient9: String?,
-    @SerializedName("strIngredient10") val strIngredient10: String?,
-    @SerializedName("strIngredient11") val strIngredient11: String?,
-    @SerializedName("strIngredient12") val strIngredient12: String?,
-    @SerializedName("strIngredient13") val strIngredient13: String?,
-    @SerializedName("strIngredient14") val strIngredient14: String?,
-    @SerializedName("strIngredient15") val strIngredient15: String?,
-    @SerializedName("strIngredient16") val strIngredient16: String?,
-    @SerializedName("strIngredient17") val strIngredient17: String?,
-    @SerializedName("strIngredient18") val strIngredient18: String?,
-    @SerializedName("strIngredient19") val strIngredient19: String?,
-    @SerializedName("strIngredient20") val strIngredient20: String?,
+    @SerializedName("strIngredient1") val strIngredient1: String? = null,
+    @SerializedName("strIngredient2") val strIngredient2: String? = null,
+    @SerializedName("strIngredient3") val strIngredient3: String? = null,
+    @SerializedName("strIngredient4") val strIngredient4: String? = null,
+    @SerializedName("strIngredient5") val strIngredient5: String? = null,
+    @SerializedName("strIngredient6") val strIngredient6: String? = null,
+    @SerializedName("strIngredient7") val strIngredient7: String? = null,
+    @SerializedName("strIngredient8") val strIngredient8: String? = null,
+    @SerializedName("strIngredient9") val strIngredient9: String? = null,
+    @SerializedName("strIngredient10") val strIngredient10: String? = null,
+    @SerializedName("strIngredient11") val strIngredient11: String? = null,
+    @SerializedName("strIngredient12") val strIngredient12: String? = null,
+    @SerializedName("strIngredient13") val strIngredient13: String? = null,
+    @SerializedName("strIngredient14") val strIngredient14: String? = null,
+    @SerializedName("strIngredient15") val strIngredient15: String? = null,
+    @SerializedName("strIngredient16") val strIngredient16: String? = null,
+    @SerializedName("strIngredient17") val strIngredient17: String? = null,
+    @SerializedName("strIngredient18") val strIngredient18: String? = null,
+    @SerializedName("strIngredient19") val strIngredient19: String? = null,
+    @SerializedName("strIngredient20") val strIngredient20: String? = null,
 
     // Measurements (up to 20)
-    @SerializedName("strMeasure1") val strMeasure1: String?,
-    @SerializedName("strMeasure2") val strMeasure2: String?,
-    @SerializedName("strMeasure3") val strMeasure3: String?,
-    @SerializedName("strMeasure4") val strMeasure4: String?,
-    @SerializedName("strMeasure5") val strMeasure5: String?,
-    @SerializedName("strMeasure6") val strMeasure6: String?,
-    @SerializedName("strMeasure7") val strMeasure7: String?,
-    @SerializedName("strMeasure8") val strMeasure8: String?,
-    @SerializedName("strMeasure9") val strMeasure9: String?,
-    @SerializedName("strMeasure10") val strMeasure10: String?,
-    @SerializedName("strMeasure11") val strMeasure11: String?,
-    @SerializedName("strMeasure12") val strMeasure12: String?,
-    @SerializedName("strMeasure13") val strMeasure13: String?,
-    @SerializedName("strMeasure14") val strMeasure14: String?,
-    @SerializedName("strMeasure15") val strMeasure15: String?,
-    @SerializedName("strMeasure16") val strMeasure16: String?,
-    @SerializedName("strMeasure17") val strMeasure17: String?,
-    @SerializedName("strMeasure18") val strMeasure18: String?,
-    @SerializedName("strMeasure19") val strMeasure19: String?,
-    @SerializedName("strMeasure20") val strMeasure20: String?,
+    @SerializedName("strMeasure1") val strMeasure1: String? = null,
+    @SerializedName("strMeasure2") val strMeasure2: String? = null,
+    @SerializedName("strMeasure3") val strMeasure3: String? = null,
+    @SerializedName("strMeasure4") val strMeasure4: String? = null,
+    @SerializedName("strMeasure5") val strMeasure5: String? = null,
+    @SerializedName("strMeasure6") val strMeasure6: String? = null,
+    @SerializedName("strMeasure7") val strMeasure7: String? = null,
+    @SerializedName("strMeasure8") val strMeasure8: String? = null,
+    @SerializedName("strMeasure9") val strMeasure9: String? = null,
+    @SerializedName("strMeasure10") val strMeasure10: String? = null,
+    @SerializedName("strMeasure11") val strMeasure11: String? = null,
+    @SerializedName("strMeasure12") val strMeasure12: String? = null,
+    @SerializedName("strMeasure13") val strMeasure13: String? = null,
+    @SerializedName("strMeasure14") val strMeasure14: String? = null,
+    @SerializedName("strMeasure15") val strMeasure15: String? = null,
+    @SerializedName("strMeasure16") val strMeasure16: String? = null,
+    @SerializedName("strMeasure17") val strMeasure17: String? = null,
+    @SerializedName("strMeasure18") val strMeasure18: String? = null,
+    @SerializedName("strMeasure19") val strMeasure19: String? = null,
+    @SerializedName("strMeasure20") val strMeasure20: String? = null,
 
     @SerializedName("strSource")
-    val strSource: String?,
+    val strSource: String? = null,
 
     @SerializedName("strImageSource")
-    val strImageSource: String?,
+    val strImageSource: String? = null,
 
     @SerializedName("strCreativeCommonsConfirmed")
-    val strCreativeCommonsConfirmed: String?,
+    val strCreativeCommonsConfirmed: String? = null,
 
     @SerializedName("dateModified")
-    val dateModified: String?
+    val dateModified: String? = null
 ) {
+    // Secondary constructor for creating from FavoriteMeal
+    constructor(favoriteMeal: FavoriteMeal) : this(
+        idMeal = favoriteMeal.idMeal,
+        strMeal = favoriteMeal.strMeal,
+        strMealThumb = favoriteMeal.strMealThumb,
+        strCategory = favoriteMeal.strCategory,
+        strArea = favoriteMeal.strArea
+    )
+
     // Helper function to get ingredients with measurements
     fun getIngredientsWithMeasurements(): List<String> {
         val ingredients = listOf(
