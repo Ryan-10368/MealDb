@@ -20,7 +20,7 @@
             android:layout_height="80dp"
             android:contentDescription="@string/meal_image"
             android:scaleType="centerCrop"
-            android:background="@color/cardview_light_background"
+            android:background="@color/light_gray"
             tools:src="@tools:sample/avatars" />
 
         <LinearLayout
@@ -52,7 +52,7 @@
 
         </LinearLayout>
 
-        <!-- FIXED: Changed to use the selector instead of just the border icon -->
+        <!-- Favorite toggle button -->
         <ImageButton
             android:id="@+id/buttonFavorite"
             android:layout_width="48dp"
@@ -61,7 +61,7 @@
             android:layout_marginStart="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_favorite_selector"
-            android:contentDescription="Toggle Favorite"
+            android:contentDescription="@string/toggle_favorite"
             android:padding="12dp" />
 
     </LinearLayout>

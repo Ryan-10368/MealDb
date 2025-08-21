@@ -1,0 +1,8 @@
+<!-- res/drawable/image_overlay.xml -->
+<!-- Subtle overlay to improve contrast on images -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:startColor="#10000000"
+        android:endColor="#20000000"
+        android:angle="270" />
+</shape>

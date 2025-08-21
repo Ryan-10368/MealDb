@@ -75,7 +75,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:nestedScrollingEnabled="false" />
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/item_ingredient" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -96,7 +97,7 @@
                 android:textColor="@android:color/black"
                 tools:text="Detailed cooking instructions will appear here..." />
 
-            <!-- Optional: Add a favorite button -->
+            <!-- Favorite toggle button -->
             <Button
                 android:id="@+id/buttonToggleFavorite"
                 android:layout_width="wrap_content"
@@ -104,7 +105,8 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
                 android:text="@string/add_to_favorites"
-                app:icon="@drawable/ic_favorite_border"
+                app:icon="@drawable/ic_favorite_selector"
+                android:contentDescription="@string/toggle_favorite"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
         </LinearLayout>
