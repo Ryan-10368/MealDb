@@ -31,7 +31,7 @@ class MealViewModel(application: Application) : AndroidViewModel(application) {
 
     private companion object {
         private const val SEARCH_DEBOUNCE_TIME = 300L // 300ms debounce
-        private const val DEFAULT_RANDOM_MEALS_COUNT = 5
+        private const val DEFAULT_RANDOM_MEALS_COUNT = 10
     }
 
     // =============================================================================
@@ -404,7 +404,7 @@ class MealViewModel(application: Application) : AndroidViewModel(application) {
             val nameResults = nameResponse.body()?.meals
             if (!nameResults.isNullOrEmpty()) {
                 Log.d("MealViewModel", "✅ Found ${nameResults.size} meals by name")
-                return nameResults
+                return enrichMealsWithDetails(nameResults) // Enrich with details
             }
         }
 
@@ -413,8 +413,8 @@ class MealViewModel(application: Application) : AndroidViewModel(application) {
         if (areaResponse.isSuccessful) {
             val areaResults = areaResponse.body()?.meals
             if (!areaResults.isNullOrEmpty()) {
-                Log.d("MealViewModel", "✅ Found ${areaResults.size} meals by area")
-                return areaResults
+                Log.d("MealViewModel", "✅ Found ${areaResults.size} meals by area - fetching details...")
+                return enrichMealsWithDetails(areaResults) // Enrich with details
             }
         }
 
@@ -423,8 +423,8 @@ class MealViewModel(application: Application) : AndroidViewModel(application) {
         if (categoryResponse.isSuccessful) {
             val categoryResults = categoryResponse.body()?.meals
             if (!categoryResults.isNullOrEmpty()) {
-                Log.d("MealViewModel", "✅ Found ${categoryResults.size} meals by category")
-                return categoryResults
+                Log.d("MealViewModel", "✅ Found ${categoryResults.size} meals by category - fetching details...")
+                return enrichMealsWithDetails(categoryResults) // Enrich with details
             }
         }
 
@@ -452,12 +452,16 @@ class MealViewModel(application: Application) : AndroidViewModel(application) {
 
                 if (response.isSuccessful) {
                     val meals = response.body()?.meals ?: emptyList()
-                    _meals.value = meals
 
                     if (meals.isEmpty()) {
+                        _meals.value = emptyList()
                         _error.value = "No meals found for $query $searchType"
+                    } else {
+                        Log.d("MealViewModel", "✅ Found ${meals.size} meals for $searchType: $query - fetching details...")
+                        val enrichedMeals = enrichMealsWithDetails(meals) // Enrich with details
+                        _meals.value = enrichedMeals
+                        Log.d("MealViewModel", "✅ Enriched ${enrichedMeals.size} meals with complete details")
                     }
-                    Log.d("MealViewModel", "✅ Found ${meals.size} meals for $searchType: $query")
                 } else {
                     handleApiError(response, "Error searching $query $searchType")
                 }
@@ -539,6 +543,24 @@ class MealViewModel(application: Application) : AndroidViewModel(application) {
         cancelAllJobs()
         Log.d("MealViewModel", "🧹 ViewModel cleared, jobs canceled")
     }
+
+    /**
+     * Fetch complete meal details for meals that might have incomplete data
+     */
+    private suspend fun enrichMealsWithDetails(meals: List<Meal>): List<Meal> {
+        return meals.map { meal ->
+            // Check if meal has complete data (category and area)
+            if (meal.strCategory.isNullOrBlank() || meal.strArea.isNullOrBlank()) {
+                // Fetch complete details using meal ID
+                meal.idMeal?.let { id ->
+                    getMealById(id) ?: meal // Use complete details or fallback to original
+                } ?: meal
+            } else {
+                meal // Already has complete data
+            }
+        }
+    }
+
 }
 
 // =============================================================================
