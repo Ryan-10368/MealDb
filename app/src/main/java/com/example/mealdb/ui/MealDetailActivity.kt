@@ -17,25 +17,71 @@ import kotlinx.coroutines.launch
 
 class MealDetailActivity : AppCompatActivity() {
 
+    // =================================
+    // CONSTANTS
+    // =================================
+
     companion object {
         const val EXTRA_MEAL_ID = "extra_meal_id"
+        private const val TAG = "MealDetailActivity"
     }
+
+    // =================================
+    // PROPERTIES
+    // =================================
 
     private lateinit var binding: ActivityMealDetailBinding
     private lateinit var viewModel: MealViewModel
     private lateinit var ingredientAdapter: IngredientAdapter
+
+    // =================================
+    // LIFECYCLE METHODS
+    // =================================
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMealDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel = ViewModelProvider(this)[MealViewModel::class.java]
+        initializeComponents()
+        loadMealFromIntent()
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        Log.d(TAG, "Toolbar back button pressed")
+        onBackPressedDispatcher.onBackPressed()
+        return true
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        Log.d(TAG, "System back button pressed - finishing activity")
+        super.onBackPressed()
+        finish()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "MealDetailActivity destroyed")
+    }
+
+    // =================================
+// INITIALIZATION
+// =================================
+
+    private fun initializeComponents() {
+        initializeViewModel()
         setupRecyclerView()
         observeViewModel()
 
-        val mealId = intent.getStringExtra(EXTRA_MEAL_ID)
-        mealId?.let { loadMealDetails(it) }
+    }
+
+
+
+
+
+    private fun initializeViewModel() {
+        viewModel = ViewModelProvider(this)[MealViewModel::class.java]
     }
 
     private fun setupRecyclerView() {
@@ -46,117 +92,159 @@ class MealDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun observeViewModel() {
-        viewModel.isLoading.observe(this) { isLoading ->
-            // You can add a progress bar in the detail layout if needed
-            // Example: binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        }
+    private fun loadMealFromIntent() {
+        val mealId = intent.getStringExtra(EXTRA_MEAL_ID)
+        mealId?.let {
+            loadMealDetails(it)
+        } ?: handleInvalidMealId()
+    }
 
+    // =================================
+    // VIEWMODEL OBSERVERS
+    // =================================
+
+    private fun observeViewModel() {
+        observeLoadingState()
+        observeErrorState()
+    }
+
+    private fun observeLoadingState() {
+        viewModel.isLoading.observe(this) { isLoading ->
+            Log.d(TAG, "Loading state: $isLoading")
+            // You can add progress bar visibility here if needed
+            // binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun observeErrorState() {
         viewModel.error.observe(this) { error ->
             error?.let {
-                // Handle error display (could show a Toast or error message)
-                // Example: Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+                Log.e(TAG, "Error observed: $error")
+                Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+                viewModel.clearError()
             }
         }
     }
+
+    // =================================
+    // DATA LOADING
+    // =================================
 
     private fun loadMealDetails(mealId: String) {
         lifecycleScope.launch {
             try {
-                Log.d("MealDetailActivity", "Loading meal details for ID: $mealId")
-
-                // Force fetch from API to get complete meal details
+                Log.d(TAG, "Loading meal details for ID: $mealId")
                 val meal = viewModel.getMealById(mealId)
-
-                if (meal != null) {
-                    Log.d("MealDetailActivity", "Meal loaded successfully: ${meal.strMeal}")
-                    displayMeal(meal)
-                } else {
-                    Log.w("MealDetailActivity", "No meal data received for ID: $mealId")
-                    // Handle case where meal details couldn't be loaded
-                    binding.textViewMealDetailName.text = "Meal details not available"
-                    // You could also show a Toast here
-                }
+                handleMealResult(meal)
             } catch (e: Exception) {
-                // Handle any exceptions during loading
-                Log.e("MealDetailActivity", "Error loading meal details for ID: $mealId", e)
-                e.printStackTrace()
-                binding.textViewMealDetailName.text = "Error loading meal details: ${e.message}"
-                // You could also show a Toast here
+                Log.e(TAG, "Error loading meal details for ID: $mealId", e)
+                handleMealLoadFailure("Error loading meal details: ${e.message}")
             }
         }
     }
 
-    private fun displayMeal(meal: Meal) {
-        binding.apply {
-            // Safely display meal name
-            textViewMealDetailName.text = meal.strMeal ?: "Unknown Meal"
-
-            // Safely display category and area
-            textViewMealDetailCategory.text = try {
-                getString(R.string.category_format, meal.strCategory ?: getString(R.string.unknown))
-            } catch (_: Exception) {
-                "Category: ${meal.strCategory ?: "Unknown"}"
-            }
-
-            textViewMealDetailArea.text = try {
-                getString(R.string.area_format, meal.strArea ?: getString(R.string.unknown))
-            } catch (_: Exception) {
-                "Area: ${meal.strArea ?: "Unknown"}"
-            }
-
-            textViewMealDetailInstructions.text = try {
-                meal.strInstructions ?: getString(R.string.no_instructions_available)
-            } catch (_: Exception) {
-            } as CharSequence?
-
-            // Load image safely
-            meal.strMealThumb?.let { imageUrl ->
-                try {
-                    Glide.with(this@MealDetailActivity)
-                        .load(imageUrl)
-                        .placeholder(R.drawable.ic_launcher_background)
-                        .error(R.drawable.ic_launcher_background)
-                        .into(imageViewMealDetail)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-
-            // Extract and display ingredients safely
-            try {
-                val ingredients = extractIngredients(meal)
-                ingredientAdapter.submitList(ingredients)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                // Submit empty list if extraction fails
-                ingredientAdapter.submitList(emptyList())
-            }
+    private fun handleMealResult(meal: Meal?) {
+        if (meal != null) {
+            Log.d(TAG, "Meal loaded successfully: ${meal.strMeal}")
+            displayMeal(meal)
+        } else {
+            Log.w(TAG, "No meal data received")
+            handleMealLoadFailure("Meal details not available")
         }
+    }
 
-        // Setup favorite button after displaying meal
+    private fun handleMealLoadFailure(message: String) {
+        binding.textViewMealDetailName.text = message
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun handleInvalidMealId() {
+        Log.e(TAG, "No meal ID provided in intent")
+        handleMealLoadFailure("Invalid meal ID")
+    }
+
+    // =================================
+    // UI DISPLAY METHODS
+    // =================================
+
+    private fun displayMeal(meal: Meal) {
+        displayBasicInfo(meal)
+        displayImage(meal)
+        displayIngredients(meal)
         setupFavoriteButton(meal)
     }
 
+    private fun displayBasicInfo(meal: Meal) {
+        binding.apply {
+            textViewMealDetailName.text = meal.strMeal ?: "Unknown Meal"
+            textViewMealDetailCategory.text = formatCategoryText(meal.strCategory)
+            textViewMealDetailArea.text = formatAreaText(meal.strArea)
+            textViewMealDetailInstructions.text = formatInstructions(meal.strInstructions)
+        }
+    }
+
+    private fun displayImage(meal: Meal) {
+        meal.strMealThumb?.let { imageUrl ->
+            try {
+                Glide.with(this@MealDetailActivity)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .error(R.drawable.ic_launcher_background)
+                    .into(binding.imageViewMealDetail)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading image", e)
+            }
+        }
+    }
+
+    private fun displayIngredients(meal: Meal) {
+        try {
+            val ingredients = extractIngredients(meal)
+            ingredientAdapter.submitList(ingredients)
+            Log.d(TAG, "Displayed ${ingredients.size} ingredients")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error extracting ingredients", e)
+            ingredientAdapter.submitList(emptyList())
+        }
+    }
+
+    // =================================
+    // TEXT FORMATTING
+    // =================================
+
+    private fun formatCategoryText(category: String?): String {
+        return try {
+            getString(R.string.category_format, category ?: getString(R.string.unknown))
+        } catch (_: Exception) {
+            "Category: ${category ?: "Unknown"}"
+        }
+    }
+
+    private fun formatAreaText(area: String?): String {
+        return try {
+            getString(R.string.area_format, area ?: getString(R.string.unknown))
+        } catch (_: Exception) {
+            "Area: ${area ?: "Unknown"}"
+        }
+    }
+
+    private fun formatInstructions(instructions: String?): String {
+        return try {
+            instructions ?: getString(R.string.no_instructions_available)
+        } catch (_: Exception) {
+            "No instructions available"
+        }
+    }
+
+    // =================================
+    // INGREDIENTS PROCESSING
+    // =================================
+
     private fun extractIngredients(meal: Meal): List<Pair<String, String>> {
         val ingredients = mutableListOf<Pair<String, String>>()
+        val ingredientsList = getIngredientsList(meal)
+        val measurementsList = getMeasurementsList(meal)
 
-        // Use the lists to create pairs
-        val ingredientsList = listOf(
-            meal.strIngredient1, meal.strIngredient2, meal.strIngredient3, meal.strIngredient4, meal.strIngredient5,
-            meal.strIngredient6, meal.strIngredient7, meal.strIngredient8, meal.strIngredient9, meal.strIngredient10,
-            meal.strIngredient11, meal.strIngredient12, meal.strIngredient13, meal.strIngredient14, meal.strIngredient15,
-            meal.strIngredient16, meal.strIngredient17, meal.strIngredient18, meal.strIngredient19, meal.strIngredient20
-        )
-
-        val measurementsList = listOf(
-            meal.strMeasure1, meal.strMeasure2, meal.strMeasure3, meal.strMeasure4, meal.strMeasure5,
-            meal.strMeasure6, meal.strMeasure7, meal.strMeasure8, meal.strMeasure9, meal.strMeasure10,
-            meal.strMeasure11, meal.strMeasure12, meal.strMeasure13, meal.strMeasure14, meal.strMeasure15,
-            meal.strMeasure16, meal.strMeasure17, meal.strMeasure18, meal.strMeasure19, meal.strMeasure20
-        )
-
-        // Create pairs of measurement and ingredient (to match your layout order)
         ingredientsList.zip(measurementsList) { ingredient, measurement ->
             if (!ingredient.isNullOrBlank()) {
                 val measure = if (measurement.isNullOrBlank()) "" else measurement.trim()
@@ -168,13 +256,40 @@ class MealDetailActivity : AppCompatActivity() {
         return ingredients
     }
 
+    private fun getIngredientsList(meal: Meal): List<String?> {
+        return listOf(
+            meal.strIngredient1, meal.strIngredient2, meal.strIngredient3, meal.strIngredient4, meal.strIngredient5,
+            meal.strIngredient6, meal.strIngredient7, meal.strIngredient8, meal.strIngredient9, meal.strIngredient10,
+            meal.strIngredient11, meal.strIngredient12, meal.strIngredient13, meal.strIngredient14, meal.strIngredient15,
+            meal.strIngredient16, meal.strIngredient17, meal.strIngredient18, meal.strIngredient19, meal.strIngredient20
+        )
+    }
+
+    private fun getMeasurementsList(meal: Meal): List<String?> {
+        return listOf(
+            meal.strMeasure1, meal.strMeasure2, meal.strMeasure3, meal.strMeasure4, meal.strMeasure5,
+            meal.strMeasure6, meal.strMeasure7, meal.strMeasure8, meal.strMeasure9, meal.strMeasure10,
+            meal.strMeasure11, meal.strMeasure12, meal.strMeasure13, meal.strMeasure14, meal.strMeasure15,
+            meal.strMeasure16, meal.strMeasure17, meal.strMeasure18, meal.strMeasure19, meal.strMeasure20
+        )
+    }
+
+    // =================================
+    // FAVORITES FUNCTIONALITY
+    // =================================
+
     private fun setupFavoriteButton(meal: Meal) {
-        // Check if meal is already favorite
+        observeFavoriteStatus(meal)
+        handleFavoriteButtonClick(meal)
+    }
+
+    private fun observeFavoriteStatus(meal: Meal) {
         viewModel.isFavorite(meal.idMeal ?: "").observe(this) { isFavorite ->
             updateFavoriteButton(isFavorite)
         }
+    }
 
-        // Handle favorite button click
+    private fun handleFavoriteButtonClick(meal: Meal) {
         binding.buttonToggleFavorite.setOnClickListener {
             viewModel.toggleFavorite(meal)
             Toast.makeText(this, "Favorite updated!", Toast.LENGTH_SHORT).show()
@@ -184,25 +299,27 @@ class MealDetailActivity : AppCompatActivity() {
     private fun updateFavoriteButton(isFavorite: Boolean) {
         binding.buttonToggleFavorite.apply {
             if (isFavorite) {
-                text = getString(R.string.remove_from_favorites)
-                // For MaterialButton, use setIconResource
-                // For regular Button, use setCompoundDrawablesWithIntrinsicBounds
-                try {
-                    // Try MaterialButton method first
-                    (this as? com.google.android.material.button.MaterialButton)?.setIconResource(R.drawable.ic_favorite_filled)
-                        ?: setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_favorite_filled, 0, 0, 0)
-                } catch (_: Exception) {
-                    setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_favorite_filled, 0, 0, 0)
-                }
+                setFavoriteButtonState(
+                    textResId = R.string.remove_from_favorites,
+                    iconResId = R.drawable.ic_favorite_filled
+                )
             } else {
-                text = getString(R.string.add_to_favorites)
-                try {
-                    // Try MaterialButton method first
-                    (this as? com.google.android.material.button.MaterialButton)?.setIconResource(R.drawable.ic_favorite_border)
-                        ?: setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_favorite_border, 0, 0, 0)
-                } catch (_: Exception) {
-                    setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_favorite_border, 0, 0, 0)
-                }
+                setFavoriteButtonState(
+                    textResId = R.string.add_to_favorites,
+                    iconResId = R.drawable.ic_favorite_border
+                )
+            }
+        }
+    }
+
+    private fun setFavoriteButtonState(textResId: Int, iconResId: Int) {
+        binding.buttonToggleFavorite.apply {
+            text = getString(textResId)
+            try {
+                (this as? com.google.android.material.button.MaterialButton)?.setIconResource(iconResId)
+                    ?: setCompoundDrawablesWithIntrinsicBounds(iconResId, 0, 0, 0)
+            } catch (_: Exception) {
+                setCompoundDrawablesWithIntrinsicBounds(iconResId, 0, 0, 0)
             }
         }
     }
