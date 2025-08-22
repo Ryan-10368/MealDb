@@ -75,11 +75,6 @@ class MealDetailActivity : AppCompatActivity() {
         observeViewModel()
 
     }
-
-
-
-
-
     private fun initializeViewModel() {
         viewModel = ViewModelProvider(this)[MealViewModel::class.java]
     }

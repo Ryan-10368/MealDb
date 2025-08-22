@@ -63,8 +63,6 @@ data class MealEntity(
     val dateModified: String?
 )
 
-// FavoriteMeal is defined in separate FavoriteMeal.kt file
-
 @Dao
 interface MealDao {
     @Query("SELECT * FROM meals")
